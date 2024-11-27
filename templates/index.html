@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicción de Precios de Activos</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-container { margin-bottom: 20px; }
+        label { font-size: 18px; }
+        input[type="text"] { padding: 8px; font-size: 16px; }
+        button { padding: 10px 15px; font-size: 16px; cursor: pointer; }
+        .image-container { margin-top: 20px; }
+        img { width: 100%; max-width: 800px; }
+    </style>
+</head>
+<body>
+
+<h1>Predicción de Precios de Activos</h1>
+
+<form action="/" method="post" class="form-container">
+    <label for="ticker">Introduce el ticker del activo (Ej: BTC-USD, GOOGL, TSLA):</label>
+    <input type="text" id="ticker" name="ticker" required>
+    <button type="submit">Predecir</button>
+</form>
+
+{% if image_path %}
+    <h2>Predicción para {{ ticker }}</h2>
+    <div class="image-container">
+        <img src="{{ image_path }}" alt="Gráfico de predicción">
+    </div>
+{% else %}
+    <p>Introduce un ticker para hacer la predicción.</p>
+{% endif %}
+
+</body>
+</html>
