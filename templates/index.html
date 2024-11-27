@@ -12,6 +12,7 @@
         button { padding: 10px 15px; font-size: 16px; cursor: pointer; }
         .image-container { margin-top: 20px; }
         img { width: 100%; max-width: 800px; }
+        .metrics { margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -28,6 +29,12 @@
     <h2>Predicción para {{ ticker }}</h2>
     <div class="image-container">
         <img src="{{ image_path }}" alt="Gráfico de predicción">
+    </div>
+    <div class="metrics">
+        <h3>Métricas de Predicción</h3>
+        <p><strong>MAE:</strong> {{ metrics.mae }}</p>
+        <p><strong>MSE:</strong> {{ metrics.mse }}</p>
+        <p><strong>RMSE:</strong> {{ metrics.rmse }}</p>
     </div>
 {% else %}
     <p>Introduce un ticker para hacer la predicción.</p>
