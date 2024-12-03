@@ -9,6 +9,8 @@ COPY requirements.txt .
 
 # Instala las dependencias
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install flask-login
+
 
 # Copia el resto de los archivos de la aplicación al contenedor
 COPY . .
@@ -18,3 +20,4 @@ EXPOSE 5000
 
 # Define el comando de inicio para la aplicación
 CMD ["python", "app.py"]
+
