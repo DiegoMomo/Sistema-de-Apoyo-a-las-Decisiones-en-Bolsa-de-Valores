@@ -22,13 +22,63 @@
             padding: 0;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 20px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar h2 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-nav {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar-nav a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-nav svg {
+            margin-right: 10px;
+        }
+
+        .main-content {
+            flex-grow: 1;
             padding: 20px;
         }
 
-        h1, h2 {
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
             color: var(--secondary-color);
             text-align: center;
         }
@@ -94,79 +144,121 @@
             color: #7f8c8d;
         }
 
-        @media (min-width: 768px) {
-            .form-container {
-                display: flex;
-                align-items: flex-end;
+        .metrics {
+            margin-top: 20px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .layout {
+                flex-direction: column;
             }
 
-            label {
-                flex: 1;
-                margin-right: 10px;
-                margin-bottom: 0;
+            .sidebar {
+                width: 100%;
+                transform: translateX(-100%);
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100%;
+                z-index: 1000;
             }
 
-            input[type="text"] {
-                flex: 2;
+            .sidebar.active {
+                transform: translateX(0);
             }
 
-            button {
-                flex: 1;
-                margin-left: 10px;
-                margin-top: 0;
+            .menu-toggle {
+                display: block;
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                z-index: 1001;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Predicción de Precios de Activos</h1>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar">
+            <h2>Menú de Navegación</h2>
+            <nav>
+                <ul class="sidebar-nav">
+                    <li>
+                        <a href="/ticket">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                            Modelo de Predicción
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Chatbot">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            Chatbot
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/logout">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            Cerrar sesión
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-        <div class="form-container">
-            <form action="/" method="post">
-                <label for="ticker">Introduce el ticker del activo:</label>
-                <input type="text" id="ticker" name="ticker" placeholder="Ej: BTC-USD, GOOGL, TSLA" required>
-                <button type="submit">Predecir</button>
-            </form>
-        </div>
+        <main class="main-content">
+            <button class="menu-toggle" id="menuToggle">☰</button>
+            <div class="container">
+                <h1>Predicción de Precios de Activos</h1>
 
-        {% if image_path %}
-            <h2>Predicción para {{ ticker }}</h2>
-            <div class="image-container">
-                <img src="{{ image_path }}" alt="Gráfico de predicción para {{ ticker }}">
+                <div class="form-container">
+                    <form action="/ticket" method="post">
+                        <label for="ticker">Introduce el ticker del activo:</label>
+                        <input type="text" id="ticker" name="ticker" placeholder="Ej: BTC-USD, GOOGL, TSLA" required>
+                        <button type="submit">Predecir</button>
+                    </form>
+                </div>
+
+                {% if image_path %}
+                    <h2>Predicción para {{ ticker }}</h2>
+                    <div class="image-container">
+                        <img src="{{ image_path }}" alt="Gráfico de predicción para {{ ticker }}">
+                    </div>
+                    <div class="metrics">
+                        <h3>Métricas de Predicción</h3>
+                        <p><strong>MAE:</strong> {{ metrics.mae }}</p>
+                        <p><strong>MSE:</strong> {{ metrics.mse }}</p>
+                        <p><strong>RMSE:</strong> {{ metrics.rmse }}</p>
+                    </div>
+                {% else %}
+                    <p class="message">Introduce un ticker y presiona "Predecir" para ver los resultados.</p>
+                {% endif %}
             </div>
-            <div class="metrics">
-                <h3>Métricas de Predicción</h3>
-                <p><strong>MAE:</strong> {{ metrics.mae }}</p>
-                <p><strong>MSE:</strong> {{ metrics.mse }}</p>
-                <p><strong>RMSE:</strong> {{ metrics.rmse }}</p>
-            </div>
-        {% else %}
-            <p class="message">Introduce un ticker para ver la predicción de precios.</p>
-        {% endif %}
+        </main>
     </div>
+
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+    </script>
 </body>
-
-<div class="menu-overlay" id="menuOverlay"></div>
-<div class="menu-content" id="menuContent">
-    <div class="menu-header">Menú de Navegación</div>
-    <button class="menu-button" onclick="window.location.href='/ticket'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-            <line x1="12" y1="22.08" x2="12" y2="12"></line>
-        </svg>
-        Modelo de Predicción
-    </button>
-    <button class="menu-button" onclick="window.location.href='chatbot.html'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-        </svg>
-        Chatbot
-    </button>
-    <button class="menu-button" onclick="window.location.href='/logout'">
-        Cerrar sesión
-    </button>
-</div>
-
 </html>
