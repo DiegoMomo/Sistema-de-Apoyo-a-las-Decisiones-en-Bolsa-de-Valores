@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, jsonify, Blueprint, redirect, url_for, session
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import os
 import yfinance as yf
@@ -8,9 +9,26 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from keras.models import Sequential
 from keras.layers import Dense, LSTM, Dropout
+import google.generativeai as genai
 
 app = Flask(__name__)
 app.secret_key = 'clave_secreta_segura'
+
+# Configura tu API key aquí
+genai.configure(api_key='AIzaSyBcS5DqVoIIjXvrlPDUixBsdnYwGt07bkk')
+
+# Crea el modelo
+generation_config = {
+    "temperature": 1,
+    "top_p": 1,
+    "max_output_tokens": 100,
+    "response_mime_type": "text/plain",
+}
+
+model = genai.GenerativeModel(
+    model_name="gemini-1.5-pro",
+    generation_config=generation_config,
+)
 
 # Configuración de Flask-Login
 login_manager = LoginManager()
@@ -28,7 +46,7 @@ class User(UserMixin):
 def load_user(user_id):
     return User(user_id) if user_id in users else None
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
@@ -42,6 +60,58 @@ def login():
             flash('Usuario o contraseña incorrectos', 'danger')
     return render_template('login.html')
 
+@app.route('/Chatbot')
+def chatbot():
+    return render_template('frm_chatbot.html')
+
+@app.route('/ask', methods=['POST'])
+def ask():
+    
+    user_input = request.json.get('input')
+    
+    # Si no hay historial en la sesión, inicialízalo
+    if 'chat_history' not in session:
+        # Aquí puedes precargar el mensaje inicial
+        session['chat_history'] = [
+            {
+                "role": "user",
+                "parts": [
+                    f"Eres un bot de trading, tu deber es responder preguntas, consultas y recomendaciones acerca del mercado y trading. Toma como referencia los tickets de YahooFinance para responder las consultas",
+                ],
+            },
+            {
+                "role": "model",
+                "parts": [
+                    "Entendido. Estoy listo para responder preguntas y consultas sobre el mercado y el trading, utilizando datos de referencia de Yahoo Finance.",
+                ],
+            },
+        ]
+
+    # Obtén el historial del chat de la sesión
+    chat_history = session['chat_history']
+
+    try:
+        # Crea una nueva sesión de chat con el historial existente
+        chat_session = model.start_chat(history=chat_history)
+
+        # Envía el mensaje del usuario al modelo
+        response = chat_session.send_message(user_input)
+
+        # Añade el mensaje del usuario y la respuesta al historial
+        chat_history.append({"role": "user", "parts": [user_input]})
+        chat_history.append({"role": "model", "parts": [response.parts[0]] if isinstance(response.parts, list) else [response.text]})
+
+        # Guarda el historial actualizado en la sesión
+        session['chat_history'] = chat_history
+
+        # Extrae la respuesta del modelo
+        response_text = response.parts[0] if isinstance(response.parts, list) else response.text
+    except Exception as e:
+        print(f"Error processing request: {e}")
+        response_text = "LO SIENTO NO PUEDO RESPONDER ESA BARBARIDAD."
+
+    return jsonify({'response': response_text})
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -49,7 +119,7 @@ def logout():
     flash('Sesión cerrada exitosamente', 'info')
     return redirect(url_for('login'))
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/ticket', methods=['GET', 'POST'])
 @login_required
 def index():
     if request.method == 'POST':
